@@ -72,7 +72,9 @@ The bot never reports a fabricated finish time. A live capture has no reliable E
 
 ## Railway deployment
 
-For the Railway service-by-service setup, volume mount, environment variables, and deployment order, see [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md). The Railway guide is designed for this repository's Dockerfile and service commands.
+For **$0 hosting charges**, run the included Compose stack on your own computer that stays online; follow [FREE_SELF_HOST.md](FREE_SELF_HOST.md). Free hosted tiers have strict storage/service limits and are not reliable for whole livestream recordings.
+
+If you later choose a paid Railway deployment, see [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md) for the service-by-service setup, volume mount, environment variables, and deployment order. Do not deploy those services until you have reviewed the current usage charges.
 
 ## Development / testing
 
