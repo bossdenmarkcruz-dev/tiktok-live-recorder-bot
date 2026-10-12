@@ -34,6 +34,20 @@ def get_job(job_id: str) -> RecordingJob | None:
         return db.get(RecordingJob, job_id)
 
 
+def delete_job_files(job_id: str, output_path: str | None = None) -> None:
+    generated = set(glob.glob(os.path.join(settings.recordings_dir, f"{job_id}.*")))
+    generated.update(glob.glob(os.path.join(settings.recordings_dir, f"{job_id}-*")))
+    generated.add(os.path.join(settings.recordings_dir, f"{job_id}.log"))
+    if output_path:
+        generated.add(output_path)
+    for path in generated:
+        if path and os.path.isfile(path):
+            try:
+                os.remove(path)
+            except OSError:
+                log.warning("Could not remove recording file %s", path)
+
+
 def prune_old_recordings() -> None:
     """Delete media past retention while keeping job metadata for history."""
     cutoff = now() - timedelta(days=max(1, settings.retention_days))
@@ -43,17 +57,7 @@ def prune_old_recordings() -> None:
             RecordingJob.finished_at < cutoff,
         )).all()
         for job in expired:
-            generated = set(glob.glob(os.path.join(settings.recordings_dir, f"{job.id}.*")))
-            generated.update(glob.glob(os.path.join(settings.recordings_dir, f"{job.id}-*")))
-            generated.add(os.path.join(settings.recordings_dir, f"{job.id}.log"))
-            if job.output_path:
-                generated.add(job.output_path)
-            for path in generated:
-                if path and os.path.isfile(path):
-                    try:
-                        os.remove(path)
-                    except OSError:
-                        log.warning("Could not prune expired media file %s", path)
+            delete_job_files(job.id, job.output_path)
             job.output_path = None
             job.file_size = None
         if expired:
@@ -212,7 +216,11 @@ def record_and_deliver(job_id: str) -> str:
         update_job(job_id, output_path=media_path, file_size=os.path.getsize(media_path), status="sending")
         delivered_path = upload_recording(job, media_path, elapsed)
         final_size = os.path.getsize(delivered_path)
-        update_job(job_id, status="completed", finished_at=now(), output_path=delivered_path, file_size=final_size, error=None)
+        stored_path = delivered_path
+        if not settings.keep_local_recordings:
+            delete_job_files(job_id, delivered_path)
+            stored_path = None
+        update_job(job_id, status="completed", finished_at=now(), output_path=stored_path, file_size=final_size, error=None)
         notify(job.chat_id, f"Recording delivered. Job {job_id} completed in {elapsed // 60} minutes.")
         return delivered_path
     except Exception as exc:

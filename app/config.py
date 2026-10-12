@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     max_recording_hours: int = 12
     probe_timeout_seconds: int = 90
     retention_days: int = 14
+    keep_local_recordings: bool = False
+    max_jobs_per_user_per_day: int = 2
+    max_active_jobs_per_user: int = 1
+    max_open_jobs_total: int = 5
 
     @property
     def allowed_user_ids(self) -> set[int]:

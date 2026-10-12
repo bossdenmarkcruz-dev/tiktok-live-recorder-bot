@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from app.config import settings
 from app.db import SessionLocal, init_db
-from app.domain import InvalidTikTokLiveURL, create_job
+from app.domain import InvalidTikTokLiveURL, JobQuotaExceeded, create_job
 from app.models import RecordingJob
 from app.queueing import enqueue_recording
 
@@ -15,7 +15,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.effective_message.reply_text(
         'Send /download_replay "https://www.tiktok.com/@creator/live" while the LIVE is active.\n'
         "The bot records from the moment it joins and sends the MP4 after the stream ends. "
-        "It cannot predict the exact end time or recover video from before recording began.\n\n"
+        "It cannot predict the exact end time or recover video from before recording began.\n"
+        "Only request recordings you own or are authorized to make. Public-use limits are 2 requests per 24 hours, "
+        "1 open request per user, and 5 open jobs total.\n\n"
         "Use /status JOB_ID to check progress."
     )
 
@@ -56,7 +58,7 @@ async def download_replay(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
             )
         else:
             await msg.reply_text(f"That URL already has an active job: {job.id}\nUse /status {job.id}")
-    except InvalidTikTokLiveURL as exc:
+    except (InvalidTikTokLiveURL, JobQuotaExceeded) as exc:
         await msg.reply_text(str(exc))
     except Exception:
         log.exception("Could not queue recording")

@@ -22,7 +22,8 @@ No public IP address or router port-forwarding is needed for Telegram bot pollin
    - `TELEGRAM_BOT_TOKEN` — the token from BotFather.
    - `POSTGRES_PASSWORD` — a strong random alphanumeric secret (hex is convenient).
    - `API_BEARER_TOKEN` — another long random secret.
-   - `ALLOWED_TELEGRAM_USER_IDS` — your numeric Telegram user ID. Do not leave it blank for a private bot; use a trusted Telegram ID lookup bot such as `@userinfobot` if needed.
+- `ALLOWED_TELEGRAM_USER_IDS` — your numeric Telegram user ID. Do not leave it blank for a private bot; use a trusted Telegram ID lookup bot such as `@userinfobot` if needed.
+- For a public bot, the blank allowlist intentionally permits anyone to use it. The default safeguards allow at most two requests per user per 24 hours, one open request per user, and five open jobs globally. Do not remove these limits on a free/limited host.
 5. Save `.env`. Do not upload or commit it.
 6. Start the bot stack from that project directory:
 
@@ -39,6 +40,7 @@ No public IP address or router port-forwarding is needed for Telegram bot pollin
 - Keep the computer awake and online while a LIVE is being recorded. Sleep, shutdown, internet loss, or Docker stopping can interrupt a recording.
 - Enable Docker Desktop to start when you sign in. On Linux, enable Docker to start at boot. Compose uses `restart: unless-stopped` so containers restart when the Docker service returns.
 - Watch free disk space and back up the Docker volumes if the recordings/job history matter. The configured 14-day cleanup runs when a new recording starts, not on a fixed schedule.
+- By default, the bot deletes local media and logs after Telegram confirms delivery; job history remains. A single source recording still needs enough temporary disk space while it is downloading and processing.
 - To stop the stack: `docker compose down`. To stop it and delete all database, queue, and recording data: `docker compose down -v` (destructive; do not run unless you intend to erase that data).
 
 ## Troubleshooting

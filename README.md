@@ -67,14 +67,16 @@ curl -H 'X-API-Key: YOUR_API_BEARER_TOKEN' 'http://localhost:8000/v1/jobs?limit=
 - `MAX_UPLOAD_MB` — conservative Telegram cloud upload ceiling (default 49 MB). Oversized MP4s are transcoded to fit where feasible; very long recordings may still exceed the cap and are reported as failed rather than silently truncated. For larger files, configure and operate a compatible local Telegram Bot API server and set `TELEGRAM_API_BASE` and its permitted upload limit.
 - `RETENTION_DAYS` — completed recording files older than this window are pruned when a new recording job starts; job metadata remains in the database. For regular cleanup during idle periods, schedule a maintenance run or add a periodic cleanup service.
 - `ALLOWED_TELEGRAM_USER_IDS` — restrict bot commands and API-submitted requester IDs.
+- `MAX_JOBS_PER_USER_PER_DAY` — public-use daily cap (default 2); duplicate active requests do not consume another slot.
+- `MAX_ACTIVE_JOBS_PER_USER` and `MAX_OPEN_JOBS_TOTAL` — limit each user's active requests (default 1) and the total queue (default 5).
+- `KEEP_LOCAL_RECORDINGS=false` — after Telegram confirms delivery, delete local media and logs while keeping job metadata. Set `true` only if you have sufficient storage and want a server-side copy.
 
 The bot never reports a fabricated finish time. A live capture has no reliable ETA until the broadcaster ends the stream. A worker/process outage during a LIVE can interrupt recording; after restart, submit a fresh request because a partially captured live session cannot necessarily be resumed at the original point.
 
-## Railway deployment
+## Temporary Railway Trial deployment
 
-For **$0 hosting charges**, run the included Compose stack on your own computer that stays online; follow [FREE_SELF_HOST.md](FREE_SELF_HOST.md). Free hosted tiers have strict storage/service limits and are not reliable for whole livestream recordings.
+For a no-paid-upgrade Railway Trial deployment, follow [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md). Trial credits are limited and a 0.5 GB volume can fail on long/high-bitrate streams; do not upgrade to a paid plan if you want to avoid charges. For **$0 cloud hosting**, run the included Compose stack on your own computer that stays online; follow [FREE_SELF_HOST.md](FREE_SELF_HOST.md).
 
-If you later choose a paid Railway deployment, see [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md) for the service-by-service setup, volume mount, environment variables, and deployment order. Do not deploy those services until you have reviewed the current usage charges.
 
 ## Development / testing
 

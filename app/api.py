@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from app.config import settings
 from app.db import SessionLocal, init_db
-from app.domain import InvalidTikTokLiveURL, create_job, public_job
+from app.domain import InvalidTikTokLiveURL, JobQuotaExceeded, create_job, public_job
 from app.models import RecordingJob
 from app.queueing import enqueue_recording, redis_connection
 
@@ -49,6 +49,8 @@ def submit_job(request: CreateJobRequest) -> dict:
         job, created = create_job(request.url, request.telegram_chat_id, request.requester_id)
     except InvalidTikTokLiveURL as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except JobQuotaExceeded as exc:
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
     if created:
         try:
             rq_id = enqueue_recording(job.id)
