@@ -70,6 +70,10 @@ curl -H 'X-API-Key: YOUR_API_BEARER_TOKEN' 'http://localhost:8000/v1/jobs?limit=
 
 The bot never reports a fabricated finish time. A live capture has no reliable ETA until the broadcaster ends the stream. A worker/process outage during a LIVE can interrupt recording; after restart, submit a fresh request because a partially captured live session cannot necessarily be resumed at the original point.
 
+## Railway deployment
+
+For the Railway service-by-service setup, volume mount, environment variables, and deployment order, see [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md). The Railway guide is designed for this repository's Dockerfile and service commands.
+
 ## Development / testing
 
 Python 3.12+, FFmpeg/ffprobe, yt-dlp, Redis, and PostgreSQL are required. Install Python packages with `pip install -r requirements.txt` and `pip install yt-dlp`, configure `.env`, then run:
