@@ -16,9 +16,11 @@ Only direct TikTok `/@handle/live` URLs are accepted; URL shorteners and other d
 
 ## Start with Docker Compose
 
-1. Create a bot token with Telegram's **@BotFather**.
-2. Copy `.env.example` to `.env`, then set `TELEGRAM_BOT_TOKEN`, `POSTGRES_PASSWORD`, and a long random `API_BEARER_TOKEN`. Use an alphanumeric password (for example, generate one with `openssl rand -hex 24`) because Compose places it in a database URL. For private use, also set `ALLOWED_TELEGRAM_USER_IDS` to a comma-separated list of numeric Telegram user IDs. Keep `.env` private.
-3. Start all services:
+1. In Telegram, open the official **@BotFather** account and send `/newbot`.
+2. Follow its prompts for a display name and a unique username ending in `bot`. BotFather will reply with the bot's HTTP API token; treat that token like a password.
+3. Copy the token into `TELEGRAM_BOT_TOKEN` in your private `.env` file or your hosting provider's secret/environment-variable settings. **Do not paste it into GitHub, commit it, or send it in chat.** If it is exposed, revoke it through BotFather and update the stored secret.
+4. Copy `.env.example` to `.env`, then set `POSTGRES_PASSWORD` and a long random `API_BEARER_TOKEN`. Use an alphanumeric password (for example, generate one with `openssl rand -hex 24`) because Compose places it in a database URL. For private use, also set `ALLOWED_TELEGRAM_USER_IDS` to a comma-separated list of numeric Telegram user IDs. Keep `.env` private.
+5. Start all services:
 
    ```bash
    docker compose up -d --build
@@ -26,8 +28,8 @@ Only direct TikTok `/@handle/live` URLs are accepted; URL shorteners and other d
    docker compose logs -f bot worker api
    ```
 
-4. Check the API on the host: `curl http://127.0.0.1:8000/healthz`
-5. Message the bot with `/start`.
+6. Check the API on the host: `curl http://127.0.0.1:8000/healthz`
+7. Message the bot with `/start`.
 
 Services are split so bot polling, HTTP API, and video recording can restart independently. Postgres, Redis, and recordings use persistent Docker volumes. The API is bound to `127.0.0.1` by default; put it behind a TLS reverse proxy if remote access is needed. Do not expose it publicly without a strong `API_BEARER_TOKEN` and an access-control policy.
 
